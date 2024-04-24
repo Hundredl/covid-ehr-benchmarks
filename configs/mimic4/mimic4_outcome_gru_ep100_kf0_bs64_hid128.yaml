@@ -1,0 +1,12 @@
+name: mimic4_outcome_gru_ep100_kf0_bs64_hid128
+model_type: dl
+model: gru
+dataset: mimic4
+task: outcome
+epochs: 5
+
+batch_size: 64
+hidden_dim: 128
+output_dim: 1
+act_layer: nn.GELU
+drop: 0.0

@@ -38,7 +38,8 @@ class SingleAttention(nn.Module):
                 self.Wx = nn.Parameter(
                     torch.randn(attention_input_dim, attention_hidden_dim)
                 )
-                self.Wtime_aware = nn.Parameter(torch.randn(1, attention_hidden_dim))
+                self.Wtime_aware = nn.Parameter(
+                    torch.randn(1, attention_hidden_dim))
                 nn.init.kaiming_uniform_(self.Wtime_aware, a=math.sqrt(5))
             else:
                 self.Wx = nn.Parameter(
@@ -47,7 +48,8 @@ class SingleAttention(nn.Module):
             self.Wt = nn.Parameter(
                 torch.randn(attention_input_dim, attention_hidden_dim)
             )
-            self.Wd = nn.Parameter(torch.randn(demographic_dim, attention_hidden_dim))
+            self.Wd = nn.Parameter(torch.randn(
+                demographic_dim, attention_hidden_dim))
             self.bh = nn.Parameter(
                 torch.zeros(
                     attention_hidden_dim,
@@ -78,7 +80,8 @@ class SingleAttention(nn.Module):
         elif attention_type == "concat":
             if self.time_aware:
                 self.Wh = nn.Parameter(
-                    torch.randn(2 * attention_input_dim + 1, attention_hidden_dim)
+                    torch.randn(2 * attention_input_dim +
+                                1, attention_hidden_dim)
                 )
             else:
                 self.Wh = nn.Parameter(
@@ -131,10 +134,12 @@ class SingleAttention(nn.Module):
 
         if self.attention_type == "add":  # B*T*I  @ H*I
             q = torch.matmul(input[:, -1, :], self.Wt)  # b h
-            q = torch.reshape(q, (batch_size, 1, self.attention_hidden_dim))  # B*1*H
+            q = torch.reshape(
+                q, (batch_size, 1, self.attention_hidden_dim))  # B*1*H
             if self.time_aware == True:
                 k = torch.matmul(input, self.Wx)  # b t h
-                time_hidden = torch.matmul(b_time_decays, self.Wtime_aware)  # b t h
+                time_hidden = torch.matmul(
+                    b_time_decays, self.Wtime_aware)  # b t h
             else:
                 k = torch.matmul(input, self.Wx)  # b t h
             if self.use_demographic:
@@ -151,7 +156,8 @@ class SingleAttention(nn.Module):
         elif self.attention_type == "mul":
             e = torch.matmul(input[:, -1, :], self.Wa)  # b i
             e = (
-                torch.matmul(e.unsqueeze(1), input.permute(0, 2, 1)).squeeze() + self.ba
+                torch.matmul(e.unsqueeze(1), input.permute(
+                    0, 2, 1)).squeeze() + self.ba
             )  # b t
         elif self.attention_type == "concat":
             q = input[:, -1, :].unsqueeze(1).repeat(1, time_step, 1)  # b t i
@@ -167,7 +173,8 @@ class SingleAttention(nn.Module):
         elif self.attention_type == "new":
 
             q = torch.matmul(input[:, -1, :], self.Wt)  # b h
-            q = torch.reshape(q, (batch_size, 1, self.attention_hidden_dim))  # B*1*H
+            q = torch.reshape(
+                q, (batch_size, 1, self.attention_hidden_dim))  # B*1*H
             k = torch.matmul(input, self.Wx)  # b t h
             dot_product = torch.matmul(q, k.transpose(1, 2)).squeeze()  # b t
             denominator = self.sigmoid(self.rate) * (
@@ -334,7 +341,8 @@ class MultiHeadedAttention(nn.Module):
     def attention(self, query, key, value, mask=None, dropout=None):
         "Compute 'Scaled Dot Product Attention'"
         d_k = query.size(-1)  # b h t d_k
-        scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)  # b h t t
+        scores = torch.matmul(query, key.transpose(-2, -1)
+                              ) / math.sqrt(d_k)  # b h t t
         if mask is not None:  # 1 1 t t
             scores = scores.masked_fill(mask == 0, -1e9)  # b h t t 下三角
         p_attn = F.softmax(scores, dim=-1)  # b h t t
@@ -372,7 +380,8 @@ class MultiHeadedAttention(nn.Module):
         )  # b num_head d_input d_v (d_k)
 
         x = (
-            x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
+            x.transpose(1, 2).contiguous().view(
+                nbatches, -1, self.h * self.d_k)
         )  # batch_size * d_input * hidden_dim
 
         # DeCov
@@ -384,7 +393,8 @@ class MultiHeadedAttention(nn.Module):
         for i in range(feature_dim - 1):
             Covs = self.cov(DeCov_contexts[i + 1, :, :])
             DeCov_loss += 0.5 * (
-                torch.norm(Covs, p="fro") ** 2 - torch.norm(torch.diag(Covs)) ** 2
+                torch.norm(Covs, p="fro") ** 2 -
+                torch.norm(torch.diag(Covs)) ** 2
             )
 
         return self.final_linear(x), DeCov_loss
@@ -482,13 +492,15 @@ class ConCare(nn.Module):
         self.MultiHeadedAttention = MultiHeadedAttention(
             self.MHD_num_head, self.d_model, dropout=self.drop
         )
-        self.SublayerConnection = SublayerConnection(self.d_model, dropout=self.drop)
+        self.SublayerConnection = SublayerConnection(
+            self.d_model, dropout=self.drop)
 
         self.PositionwiseFeedForward = PositionwiseFeedForward(
             self.d_model, self.d_ff, dropout=0.1
         )
 
-        self.demo_lab_proj = nn.Linear(self.demo_dim + self.lab_dim, self.hidden_dim)
+        self.demo_lab_proj = nn.Linear(
+            self.demo_dim + self.lab_dim, self.hidden_dim)
         self.demo_proj_main = nn.Linear(self.demo_dim, self.hidden_dim)
         self.demo_proj = nn.Linear(self.demo_dim, self.hidden_dim)
         self.output0 = nn.Linear(self.hidden_dim, self.hidden_dim)
@@ -575,7 +587,7 @@ class ConCare(nn.Module):
         """extra info is not used here"""
         batch_size, time_steps, _ = x.size()
         demo_input = x[:, 0, : self.demo_dim]
-        lab_input = x[:, :, self.demo_dim :]
+        lab_input = x[:, :, self.demo_dim:]
         out = torch.zeros((batch_size, time_steps, self.hidden_dim))
         for cur_time in range(time_steps):
             # print(cur_time, end=" ")
@@ -584,6 +596,7 @@ class ConCare(nn.Module):
             if cur_time == 0:
                 out[:, cur_time, :] = self.demo_lab_proj(x[:, 0, :])
             else:
-                out[:, cur_time, :] = self.concare_encoder(cur_lab, demo_input, device)
+                out[:, cur_time, :] = self.concare_encoder(
+                    cur_lab, demo_input, device)
         # print()
         return out

@@ -10,10 +10,10 @@ matplotlib
 seaborn
 numpyencoder
 sqlalchemy
-
+tqdm
 # if use mysql
 # sudo apt-get install -y python3-mysqldb
-mysqlclient
+# mysqlclient
 
 # if use postgresql
-psycopg2-binary
+# psycopg2-binary

@@ -1,0 +1,13 @@
+name: mimic4_outcome_retain_ep100_kf0_bs64_hid64
+model_type: ehr
+model: retain
+dataset: mimic4
+task: outcome
+
+
+
+batch_size: 64
+hidden_dim: 64
+output_dim: 1
+act_layer: nn.GELU
+drop: 0.0

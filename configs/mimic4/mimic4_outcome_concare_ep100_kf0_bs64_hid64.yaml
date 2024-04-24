@@ -1,0 +1,14 @@
+name: mimic4_outcome_concare_ep100_kf0_bs64_hid64
+model_type: ehr
+model: concare
+dataset: mimic4
+task: outcome
+
+
+batch_size: 64
+hidden_dim: 64
+
+MHD_num_head: 4
+
+output_dim: 1
+drop: 0.0
